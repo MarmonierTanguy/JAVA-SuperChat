@@ -1,6 +1,8 @@
 package client;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -15,10 +17,10 @@ import javafx.scene.text.TextFlow;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Calendar;
+import java.util.Observer;
 import java.util.Scanner;
 
-public class ClientPanel extends Parent implements Runnable {
+public class ClientPanel extends Parent implements Observer {
 
     private TextArea textToSend;
     private ScrollPane scrollReceivedText;
@@ -26,21 +28,19 @@ public class ClientPanel extends Parent implements Runnable {
     private TextFlow receivedText;
     private Button sendBtn;
     private Button clearBtn;
-    private Button refreshBtn;
     private TextArea connected;
     private Text textMembers;
-    private Client client;
-    private PrintWriter out;
-    private BufferedReader in;
-    private NewMessage newMessageGlobal;
+    private NewMessageObservable newMessageObservable;
+    private ClientSend clientSend;
 
     /**
      * Constructor
      */
-    ClientPanel() {
+    ClientPanel(ClientSend clientSend, NewMessageObservable newMessageObservable) {
         this.initBasicGraphs();
         this.initButtons();
-        this.newMessageGlobal = new NewMessage();
+        this.newMessageObservable = newMessageObservable;
+        this.clientSend = clientSend;
     }
 
     /**
@@ -81,13 +81,6 @@ public class ClientPanel extends Parent implements Runnable {
         this.clearBtn.setPrefHeight(30);
         this.clearBtn.setText("Effacer");
         this.clearBtn.setVisible(true);
-        this.refreshBtn = new Button();
-        this.refreshBtn.setLayoutX(470);
-        this.refreshBtn.setLayoutY(420);
-        this.refreshBtn.setPrefWidth(100);
-        this.refreshBtn.setPrefHeight(30);
-        this.refreshBtn.setText("Rafraichir");
-        this.refreshBtn.setVisible(true);
         this.connected = new TextArea();
         this.connected.setLayoutX(470);
         this.connected.setLayoutY(50);
@@ -106,10 +99,8 @@ public class ClientPanel extends Parent implements Runnable {
         this.getChildren().add(this.textConnected);
         this.getChildren().add(this.sendBtn);
         this.getChildren().add(this.clearBtn);
-        this.getChildren().add(this.refreshBtn);
         this.getChildren().add(this.connected);
         this.getChildren().add(this.textMembers);
-
     }
 
     /**
@@ -131,24 +122,14 @@ public class ClientPanel extends Parent implements Runnable {
                 // Get text from input.
                 String newMessage = textToSend.getText();
 
-                // Update new global message.
-                newMessageGlobal.setMessage(newMessage);
-
-                // Print message on panel
-                printNewMessage();
+                // Update newMessageObservable.
+                newMessageObservable.setMessage("[moi] : " + newMessage);
 
                 // Reset text from input.
                 textToSend.setText("");
 
                 // Send message to server.
-                sendNewMessageOnServer(newMessage);
-            }
-        });
-        // Init refresh button.
-        this.refreshBtn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                printNewMessage();
+                clientSend.sendMessage(newMessage);
             }
         });
     }
@@ -156,8 +137,8 @@ public class ClientPanel extends Parent implements Runnable {
     /**
      * Private method used to print a new message on panel.
      */
-    private void printNewMessage() {
-        Label newMessage = new Label(newMessageGlobal.getMessage());
+    private void printNewMessage(String message) {
+        Label newMessage = new Label(message);
         newMessage.setPrefWidth(400);
         newMessage.setWrapText(true);
         newMessage.setPadding(new Insets(5, 0, 0, 0));
@@ -165,43 +146,15 @@ public class ClientPanel extends Parent implements Runnable {
     }
 
     /**
-     * Public method used to send new message on server.
-     */
-    private void sendNewMessageOnServer(String message) {
-        this.out.println(message);
-        this.out.flush();
-    }
-
-    /**
-     * Public method used to init the server properties of the client panel.
-     */
-    public void initServerProperties(Client client, BufferedReader in, PrintWriter out) {
-        this.client = client;
-        this.in = in;
-        this.out = out;
-    }
-
-    /**
-     * Thread used to watch for new messages.
+     * Public method called on new message (observer method).
      */
     @Override
-    public void run() {
-        boolean isActive = true;
-        while(isActive) {
-            try {
-                String message = in.readLine();
-                if(message != null) {
-                    newMessageGlobal.setMessage(message);
-                }
-                else {
-                    isActive = false;
-                }
+    public void update(java.util.Observable o, Object arg) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                printNewMessage(newMessageObservable.getMessage());
             }
-            catch(IOException e) {
-                System.out.println("Erreur lors de la réception du message : " + e);
-            }
-        }
-        client.disconnectedServer();
+        });
     }
-
 }

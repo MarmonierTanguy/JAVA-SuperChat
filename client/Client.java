@@ -13,14 +13,17 @@ public class Client {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-    private ClientPanel clientPanel;
+    private ClientSend clientSend;
+    private ClientReceive clientReceive;
+    private NewMessageObservable newMessageObservable;
 
     /**
      * Constructor
      */
-    Client(String address, int port, ClientPanel clientPanel) {
+    Client(String address, int port, NewMessageObservable newMessageObservable) {
         this.address = address;
         this.port = port;
+        this.newMessageObservable = newMessageObservable;
         try {
             this.socket = new Socket(address, port);
         } catch (IOException e) {
@@ -32,10 +35,17 @@ public class Client {
         } catch (IOException e) {
             System.out.println("Impossible de créer le buffer/writer : " + e);
         }
-        this.clientPanel = clientPanel;
-        this.clientPanel.initServerProperties(this, this.in, this.out);
-        Thread threadClientPanel = new Thread(this.clientPanel);
-        threadClientPanel.start();
+        this.clientSend = new ClientSend(this.out);
+        this.clientReceive = new ClientReceive(this, this.in, this.newMessageObservable);
+        Thread threadClientSend = new Thread(this.clientReceive);
+        threadClientSend.start();
+    }
+
+    /**
+     * Public method used to get the clientSend.
+     */
+    public ClientSend getClientSend() {
+        return clientSend;
     }
 
     /**
