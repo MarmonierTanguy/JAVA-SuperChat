@@ -12,6 +12,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
@@ -234,11 +235,33 @@ public class ClientPanel extends Parent implements Observer {
         });
         //Init connectionButton
         this.connectBtn.setOnAction(event ->{
-            connectionPanel.setVisible(false);
-            chatPannel.setVisible(true);
-            this.client = new Client(address.getText(),Integer.parseInt(port.getText()), this.newMessageObservable);
-            this.clientSend = this.client.getClientSend();
-            this.username = usernameText.getText();
+            if ( !(usernameText.getText().isEmpty()) && (!(address.getText().isEmpty()) && !(address.getText().contains("[a-zA-Z]+"))) && (!(port.getText().isEmpty() || !(port.getText().contains("[a-zA-Z]+")))) ) {
+                connectionPanel.setVisible(false);
+                chatPannel.setVisible(true);
+                this.client = new Client(address.getText(), Integer.parseInt(port.getText()), this.newMessageObservable);
+                this.clientSend = this.client.getClientSend();
+                this.username = usernameText.getText();
+            }
+            else {
+                if (usernameText.getText().isEmpty()) {
+                    usernameText.setText("faux");
+                } else {
+                    usernameText.setOpacity(0.5);
+                }
+                if (address.getText().isEmpty() || address.getText().contains("[a-zA-Z]+")) {
+                    address.setText("faux");
+                } else {
+                    address.setOpacity(0.5);
+                }
+                if (port.getText().isEmpty() || port.getText().contains("[a-zA-Z]+")) {
+                    port.setText("faux");
+                } else {
+                    port.setOpacity(0.5);
+                }
+
+                //address.setOpacity(usernameText.getText().isEmpty() ? 0.0 : 1.0);
+                //port.setOpacity(usernameText.getText().isEmpty()? 0.0 : 1.0);
+            }
         } );
     }
 
