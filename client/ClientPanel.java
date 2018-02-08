@@ -46,11 +46,13 @@ public class ClientPanel extends Parent implements Observer {
     private NewMessageObservable newMessageObservable;
     private ClientSend clientSend;
     private String username;
+    private ServerHistory serverHistory;
 
     /**
      * Constructor
      */
-    ClientPanel(NewMessageObservable newMessageObservable) {
+    ClientPanel(NewMessageObservable newMessageObservable, ServerHistory serverHistory) {
+        this.serverHistory = serverHistory;
         this.initBasicGraphs();
         this.initButtons();
         this.newMessageObservable = newMessageObservable;
@@ -236,7 +238,8 @@ public class ClientPanel extends Parent implements Observer {
         this.connectBtn.setOnAction(event ->{
             connectionPanel.setVisible(false);
             chatPannel.setVisible(true);
-            this.client = new Client(address.getText(),Integer.parseInt(port.getText()), this.newMessageObservable);
+            String serverAddress = this.serverHistory.findServerFromAlias(address.getText());
+            this.client = new Client(serverAddress, Integer.parseInt(port.getText()), this.newMessageObservable);
             this.clientSend = this.client.getClientSend();
             this.username = usernameText.getText();
         } );

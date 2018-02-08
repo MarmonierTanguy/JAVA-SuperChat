@@ -10,12 +10,16 @@ public class MainView extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
+        // Init server history.
+        String csv = "F:\\intellij-devops-shared\\devops\\src\\client\\server-aliases.csv";
+        ServerHistory serverHistory = new ServerHistory(csv);
+
         // Init message observable (used to update the gui).
         NewMessageObservable newMessageObservable = new NewMessageObservable();
 
         // Init panel.
         Group root = new Group();
-        ClientPanel clientPanel = new ClientPanel(newMessageObservable);
+        ClientPanel clientPanel = new ClientPanel(newMessageObservable, serverHistory);
         root.getChildren().add(clientPanel);
         primaryStage.setTitle("SuperChat");
         Scene scene = new Scene(root, 600, 500);
