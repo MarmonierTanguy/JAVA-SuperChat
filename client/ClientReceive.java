@@ -22,7 +22,6 @@ public class ClientReceive implements Runnable {
             try {
                 String message = in.readLine();
                 if (message != null) {
-                    System.out.println("\nNouveau message reçu : " + message);
                     this.newMessageObservable.setMessage(message);
                 } else {
                     isActive = false;
