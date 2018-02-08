@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
@@ -35,6 +37,7 @@ public class ClientPanel extends Parent implements Observer {
         this.initButtons();
         this.newMessageObservable = newMessageObservable;
         this.clientSend = clientSend;
+        this.initEnterKeyListener();
     }
 
     /**
@@ -112,20 +115,42 @@ public class ClientPanel extends Parent implements Observer {
         this.sendBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-
-                // Get text from input.
-                String newMessage = textToSend.getText();
-
-                // Update newMessageObservable.
-                newMessageObservable.setMessage("[moi] : " + newMessage);
-
-                // Reset text from input.
-                textToSend.setText("");
-
-                // Send message to server.
-                clientSend.sendMessage(newMessage);
+                sendNewMessageFromInput();
             }
         });
+    }
+
+    /**
+     * Private method used to listen to the enter press key event on new message.
+     */
+    private void initEnterKeyListener() {
+        this.textToSend.setOnKeyPressed(
+            new EventHandler<KeyEvent>() {
+                @Override
+                public void handle(KeyEvent event) {
+                    if(event.getCode() == KeyCode.ENTER) {
+                        sendNewMessageFromInput();
+                    }
+                }
+            }
+        );
+    }
+
+    /**
+     * Private method used to send a new message (message is from send message input).
+     */
+    private void sendNewMessageFromInput() {
+        // Get text from input.
+        String newMessage = textToSend.getText();
+
+        // Update newMessageObservable.
+        newMessageObservable.setMessage("[moi] : " + newMessage);
+
+        // Reset text from input.
+        textToSend.setText("");
+
+        // Send message to server.
+        clientSend.sendMessage(newMessage);
     }
 
     /**
