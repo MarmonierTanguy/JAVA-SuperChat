@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -18,7 +20,6 @@ import java.util.Calendar;
 import java.util.Observer;
 
 public class ClientPanel extends Parent implements Observer {
-
 
     private Pane chatPannel;
 
@@ -53,6 +54,7 @@ public class ClientPanel extends Parent implements Observer {
         this.initBasicGraphs();
         this.initButtons();
         this.newMessageObservable = newMessageObservable;
+        this.initEnterKeyListener();
     }
 
     /**
@@ -152,7 +154,6 @@ public class ClientPanel extends Parent implements Observer {
         chatPannel = new Pane();
         connectionPanel = new Pane();
 
-
         chatPannel.getChildren().add(receivedText);
         chatPannel.getChildren().add(connected);
         chatPannel.getChildren().add(membersText);
@@ -167,12 +168,50 @@ public class ClientPanel extends Parent implements Observer {
         connectionPanel.getChildren().add(port);
         connectionPanel.getChildren().add(address);
 
-
         connectionPanel.setLayoutX(200);
         connectionPanel.setLayoutY(150);
         chatPannel.setVisible(false);
         this.getChildren().add(chatPannel);
         this.getChildren().add(connectionPanel);
+    }
+
+    /**
+     * Private method used to listen to the enter press key event on new message.
+     */
+    private void initEnterKeyListener() {
+        this.textToSend.setOnKeyPressed(
+                new EventHandler<KeyEvent>() {
+                    @Override
+                    public void handle(KeyEvent event) {
+                        if(event.getCode() == KeyCode.ENTER) {
+                            event.consume();
+                            sendNewMessageFromInput();
+                        }
+                    }
+                }
+        );
+    }
+
+    /**
+     * Private method used to send a new message (message is from send message input).
+     */
+    private void sendNewMessageFromInput() {
+
+        // Get text from input.
+        String newMessage = textToSend.getText();
+
+        if (!newMessage.isEmpty()) {
+
+            // Update newMessageObservable.
+            newMessageObservable.setMessage(username + " : " + newMessage);
+
+            // Reset text from input.
+            textToSend.setText("");
+
+            // Send message to server.
+            clientSend.sendMessage(username + " : " + newMessage);
+
+        }
     }
 
     /**
@@ -190,18 +229,7 @@ public class ClientPanel extends Parent implements Observer {
         this.sendBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-
-                // Get text from input.
-                String newMessage = textToSend.getText();
-
-                // Update newMessageObservable.
-                newMessageObservable.setMessage( username + " : " + newMessage);
-
-                // Reset text from input.
-                textToSend.setText("");
-
-                // Send message to server.
-                clientSend.sendMessage(username + " : " + newMessage);
+                sendNewMessageFromInput();
             }
         });
         //Init connectionButton
