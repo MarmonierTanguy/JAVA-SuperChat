@@ -15,6 +15,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
+import shared.Message;
+import shared.User;
 
 import java.util.Calendar;
 import java.util.Observer;
@@ -45,7 +47,7 @@ public class ClientPanel extends Parent implements Observer {
     private Client client;
     private NewMessageObservable newMessageObservable;
     private ClientSend clientSend;
-    private String username;
+    private User user;
 
     /**
      * Constructor
@@ -198,18 +200,17 @@ public class ClientPanel extends Parent implements Observer {
     private void sendNewMessageFromInput() {
 
         // Get text from input.
-        String newMessage = textToSend.getText();
-
-        if (!newMessage.isEmpty()) {
+        if(!textToSend.getText().isEmpty()){
+        Message newMessage = new Message(user,textToSend.getText());
 
             // Update newMessageObservable.
-            newMessageObservable.setMessage(username + " : " + newMessage);
+            newMessageObservable.setMessage(newMessage);
 
             // Reset text from input.
             textToSend.setText("");
 
             // Send message to server.
-            clientSend.sendMessage(username + " : " + newMessage);
+            clientSend.sendMessage(newMessage);
 
         }
     }
@@ -238,17 +239,18 @@ public class ClientPanel extends Parent implements Observer {
             chatPannel.setVisible(true);
             this.client = new Client(address.getText(),Integer.parseInt(port.getText()), this.newMessageObservable);
             this.clientSend = this.client.getClientSend();
-            this.username = usernameText.getText();
+            this.user = new User(usernameText.getText());
+            this.clientSend.sendUser(user);
         } );
     }
 
     /**
      * Private method used to print a new message on panel.
      */
-    private void printNewMessage(String message) {
+    private void printNewMessage(Message message) {
         Calendar now = Calendar.getInstance();
         System.out.println(now.get(Calendar.HOUR_OF_DAY) + ":" + now.get(Calendar.MINUTE));
-        Label newMessage = new Label("[" + now.get(Calendar.HOUR_OF_DAY) + ":" + now.get(Calendar.MINUTE) + "] " + message);
+        Label newMessage = new Label("[" + now.get(Calendar.HOUR_OF_DAY) + ":" + now.get(Calendar.MINUTE) + "] " + message.getSender() +" : "+message.getText());
         newMessage.setPrefWidth(400);
         newMessage.setWrapText(true);
         newMessage.setPadding(new Insets(5, 0, 0, 0));

@@ -1,29 +1,30 @@
 package client;
 
+import shared.Message;
+
 import java.util.Observable;
 
 public class NewMessageObservable extends Observable {
 
-    private String message;
+    private Message message;
 
     /**
      * Constructor
      */
     NewMessageObservable() {
-        this.message = "";
     }
 
     /**
      * Public method used to get the message.
      */
-    public String getMessage() {
+    public Message getMessage() {
         return this.message;
     }
 
     /**
      * Public method used to set the message.
      */
-    public void setMessage(String message) {
+    public void setMessage(Message message) {
         this.message = message;
         setChanged();
         notifyObservers(message);

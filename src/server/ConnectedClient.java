@@ -1,19 +1,20 @@
 package server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import shared.Message;
+import shared.User;
+
+import java.io.*;
 import java.net.Socket;
 
 public class ConnectedClient implements Runnable {
 
     private static int idCounter = 0;
     private int id;
+    private User user;
     private Server server;
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
 
     ConnectedClient(Server server, Socket socket){
         this.server = server;
@@ -21,8 +22,8 @@ public class ConnectedClient implements Runnable {
         this.id = idCounter;
         this.idCounter++;
         try {
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.out = new PrintWriter(socket.getOutputStream());
+            this.in = new ObjectInputStream(socket.getInputStream());
+            this.out = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             System.out.println("Impossible de créer le buffer/writer pour ce client : " + e);
         }
@@ -33,9 +34,16 @@ public class ConnectedClient implements Runnable {
         return this.id;
     }
 
-    public void sendMessage(String message) {
-        this.out.println(message);
-        this.out.flush();
+    public User getUser() {
+        return user;
+    }
+
+    public void sendMessage(Message message) {
+        try {
+            this.out.writeObject(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void closeClient() {
@@ -52,20 +60,29 @@ public class ConnectedClient implements Runnable {
     public void run() {
         boolean isActive = true;
         while (isActive) {
-            String message = null;
+            Message message = null;
             try {
-                message = this.in.readLine();
+                Object obj = this.in.readObject();
+                if (obj instanceof Message) {
+                    message = (Message) obj;
+                    if(message != null) {
+                        this.server.broadcastMessage(message);
+                    }
+                    else {
+                        server.disconnectedClient(this);
+                        isActive = false;
+                    }
+                }
+                else if(obj instanceof User){
+                    this.user = (User) obj;
+                }
             } catch (IOException e) {
                 server.disconnectedClient(this);
                 isActive = false;
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
-            if(message != null) {
-                this.server.broadcastMessage(message, id);
-            }
-            else {
-                server.disconnectedClient(this);
-                isActive = false;
-            }
+
         }
     }
 }

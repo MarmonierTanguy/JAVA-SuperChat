@@ -1,9 +1,6 @@
 package client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 public class Client {
@@ -11,8 +8,8 @@ public class Client {
     private String address;
     private int port;
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     private ClientSend clientSend;
     private ClientReceive clientReceive;
     private NewMessageObservable newMessageObservable;
@@ -30,8 +27,8 @@ public class Client {
             System.out.println("Impossible d'ouvrir la connexion avec le serveur : " + e);
         }
         try {
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.out = new PrintWriter(socket.getOutputStream());
+            this.in = new ObjectInputStream(socket.getInputStream());
+            this.out = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             System.out.println("Impossible de créer le buffer/writer : " + e);
         }
