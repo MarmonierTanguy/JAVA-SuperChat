@@ -129,6 +129,7 @@ public class ClientPanel extends Parent implements Observer {
                 @Override
                 public void handle(KeyEvent event) {
                     if(event.getCode() == KeyCode.ENTER) {
+                        event.consume();
                         sendNewMessageFromInput();
                     }
                 }
@@ -140,17 +141,21 @@ public class ClientPanel extends Parent implements Observer {
      * Private method used to send a new message (message is from send message input).
      */
     private void sendNewMessageFromInput() {
+
         // Get text from input.
         String newMessage = textToSend.getText();
 
-        // Update newMessageObservable.
-        newMessageObservable.setMessage("[moi] : " + newMessage);
+        if (!newMessage.isEmpty()) {
 
-        // Reset text from input.
-        textToSend.setText("");
+            // Update newMessageObservable.
+            newMessageObservable.setMessage("[moi] : " + newMessage);
 
-        // Send message to server.
-        clientSend.sendMessage(newMessage);
+            // Reset text from input.
+            textToSend.setText("");
+
+            // Send message to server.
+            clientSend.sendMessage(newMessage);
+        }
     }
 
     /**

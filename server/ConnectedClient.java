@@ -56,7 +56,8 @@ public class ConnectedClient implements Runnable {
             try {
                 message = this.in.readLine();
             } catch (IOException e) {
-                System.out.println("Impossible de lire/broadcaster les messages du client " + this.id + " : " + e);
+                server.disconnectedClient(this);
+                isActive = false;
             }
             if(message != null) {
                 this.server.broadcastMessage(message, id);
