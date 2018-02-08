@@ -12,6 +12,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
@@ -235,13 +236,41 @@ public class ClientPanel extends Parent implements Observer {
             }
         });
         //Init connectionButton
+        //Verify what contains the field
         this.connectBtn.setOnAction(event ->{
-            connectionPanel.setVisible(false);
-            chatPannel.setVisible(true);
-            String serverAddress = this.serverHistory.findServerFromAlias(address.getText());
-            this.client = new Client(serverAddress, Integer.parseInt(port.getText()), this.newMessageObservable);
-            this.clientSend = this.client.getClientSend();
-            this.username = usernameText.getText();
+
+            if ( !(usernameText.getText().isEmpty()) && !(address.getText().isEmpty()) && !(port.getText().isEmpty()) ) {
+                connectionPanel.setVisible(false);
+                chatPannel.setVisible(true);
+                String serverAddress = this.serverHistory.findServerFromAlias(address.getText());
+                this.client = new Client(serverAddress, Integer.parseInt(port.getText()), this.newMessageObservable);
+                this.clientSend = this.client.getClientSend();
+                this.username = usernameText.getText();
+                connectionPanel.setVisible(false);
+                chatPannel.setVisible(true);
+            }
+            else {
+                if (usernameText.getText().isEmpty()) {
+                    usernameText.setText("Vide");
+                } else {
+                    usernameText.setOpacity(0.5);
+                }
+
+                if (address.getText().isEmpty()) {
+                    address.setText("Vide");
+                }
+                else {
+                    address.setOpacity(0.5);
+                }
+
+                if (port.getText().isEmpty()) {
+                    port.setText("Vide");
+                }
+                else {
+                    port.setOpacity(0.5);
+                }
+            }
+
         } );
     }
 
