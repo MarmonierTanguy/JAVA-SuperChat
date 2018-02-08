@@ -16,25 +16,40 @@ import java.util.Observer;
 
 public class ClientPanel extends Parent implements Observer {
 
+
+    private Pane chatPannel;
+
     private TextArea textToSend;
     private ScrollPane scrollReceivedText;
-    private Text textConnected;
+    private Text connectedText;
     private TextFlow receivedText;
     private Button sendBtn;
     private Button clearBtn;
     private TextArea connected;
-    private Text textMembers;
+    private Text membersText;
+
+    private Pane connectionPanel;
+
+    private TextArea port;
+    private TextArea address;
+    private TextArea usernameText;
+    private Button connectBtn;
+    private Text welcomText;
+    private String btnConnectLabel = "Connexion";
+    private String messageAcceuilLabel = "WELCOME TO SUPERCHAT";
+
+    private Client client;
     private NewMessageObservable newMessageObservable;
     private ClientSend clientSend;
+    private String username;
 
     /**
      * Constructor
      */
-    ClientPanel(ClientSend clientSend, NewMessageObservable newMessageObservable) {
+    ClientPanel(NewMessageObservable newMessageObservable) {
         this.initBasicGraphs();
         this.initButtons();
         this.newMessageObservable = newMessageObservable;
-        this.clientSend = clientSend;
     }
 
     /**
@@ -46,21 +61,25 @@ public class ClientPanel extends Parent implements Observer {
         this.textToSend.setLayoutY(350);
         this.textToSend.setPrefWidth(400);
         this.textToSend.setPrefHeight(100);
+
         this.scrollReceivedText = new ScrollPane();
         this.scrollReceivedText.setLayoutX(50);
         this.scrollReceivedText.setLayoutY(50);
         this.scrollReceivedText.setPrefWidth(400);
         this.scrollReceivedText.setPrefHeight(280);
-        this.textConnected = new Text();
-        this.textConnected.setLayoutX(50);
-        this.textConnected.setLayoutY(40);
-        this.textConnected.setText("Messages");
+
+        this.connectedText = new Text();
+        this.connectedText.setLayoutX(50);
+        this.connectedText.setLayoutY(40);
+        this.connectedText.setText("Messages");
+
         this.receivedText = new TextFlow();
         this.receivedText.setLayoutX(50);
         this.receivedText.setLayoutY(50);
         this.receivedText.setPrefWidth(380);
         this.receivedText.setPrefHeight(250);
         this.receivedText.setVisible(true);
+
         this.sendBtn = new Button();
         this.sendBtn.setLayoutX(470);
         this.sendBtn.setLayoutY(350);
@@ -68,6 +87,7 @@ public class ClientPanel extends Parent implements Observer {
         this.sendBtn.setPrefHeight(30);
         this.sendBtn.setText("Envoyer");
         this.sendBtn.setVisible(true);
+
         this.clearBtn = new Button();
         this.clearBtn.setLayoutX(470);
         this.clearBtn.setLayoutY(385);
@@ -75,26 +95,81 @@ public class ClientPanel extends Parent implements Observer {
         this.clearBtn.setPrefHeight(30);
         this.clearBtn.setText("Effacer");
         this.clearBtn.setVisible(true);
+
         this.connected = new TextArea();
         this.connected.setLayoutX(470);
         this.connected.setLayoutY(50);
         this.connected.setPrefWidth(100);
         this.connected.setPrefHeight(280);
         this.connected.setEditable(false);
-        this.textMembers = new Text();
-        this.textMembers.setLayoutX(470);
-        this.textMembers.setLayoutY(40);
-        this.textMembers.setText("Connectés");
+
+        this.membersText = new Text();
+        this.membersText.setLayoutX(470);
+        this.membersText.setLayoutY(40);
+        this.membersText.setText("Connectés");
+
         this.scrollReceivedText.setContent(this.receivedText);
         this.scrollReceivedText.vvalueProperty().bind(this.receivedText.heightProperty());
-        this.getChildren().add(this.textToSend);
-        this.getChildren().add(this.scrollReceivedText);
-        this.getChildren().add(this.receivedText);
-        this.getChildren().add(this.textConnected);
-        this.getChildren().add(this.sendBtn);
-        this.getChildren().add(this.clearBtn);
-        this.getChildren().add(this.connected);
-        this.getChildren().add(this.textMembers);
+
+        this.usernameText = new TextArea();
+        usernameText.setLayoutX(20);
+        usernameText.setLayoutY(60);
+        usernameText.setPrefHeight(25);
+        usernameText.setPrefWidth(165);
+        usernameText.setPromptText("Pseudo");
+
+        this.port = new TextArea();
+        port.setLayoutX(125);
+        port.setLayoutY(20);
+        port.setPrefHeight(25);
+        port.setPrefWidth(60);
+        port.setPromptText("Port");
+
+        this.address = new TextArea();
+        address.setLayoutX(20);
+        address.setLayoutY(20);
+        address.setPrefHeight(25);
+        address.setPrefWidth(100);
+        address.setPromptText("Address");
+
+        this.connectBtn = new Button();
+        connectBtn.setLayoutX(55);
+        connectBtn.setLayoutY(100);
+        connectBtn.setPrefHeight(25);
+        connectBtn.setPrefWidth(100);
+        connectBtn.setText(btnConnectLabel);
+        connectBtn.setVisible(true);
+
+        this.welcomText = new Text();
+        welcomText.setLayoutX(35);
+        welcomText.setLayoutY(15);
+        welcomText.setText(messageAcceuilLabel);
+        welcomText.setTextAlignment(TextAlignment.CENTER);
+
+        chatPannel = new Pane();
+        connectionPanel = new Pane();
+
+
+        chatPannel.getChildren().add(receivedText);
+        chatPannel.getChildren().add(connected);
+        chatPannel.getChildren().add(membersText);
+        chatPannel.getChildren().add(scrollReceivedText);
+        chatPannel.getChildren().add(textToSend);
+        chatPannel.getChildren().add(clearBtn);
+        chatPannel.getChildren().add(sendBtn);
+
+        connectionPanel.getChildren().add(usernameText);
+        connectionPanel.getChildren().add(welcomText);
+        connectionPanel.getChildren().add(connectBtn);
+        connectionPanel.getChildren().add(port);
+        connectionPanel.getChildren().add(address);
+
+
+        connectionPanel.setLayoutX(200);
+        connectionPanel.setLayoutY(150);
+        chatPannel.setVisible(false);
+        this.getChildren().add(chatPannel);
+        this.getChildren().add(connectionPanel);
     }
 
     /**
@@ -117,7 +192,7 @@ public class ClientPanel extends Parent implements Observer {
                 String newMessage = textToSend.getText();
 
                 // Update newMessageObservable.
-                newMessageObservable.setMessage("[moi] : " + newMessage);
+                newMessageObservable.setMessage( username" : " + newMessage);
 
                 // Reset text from input.
                 textToSend.setText("");
@@ -126,13 +201,23 @@ public class ClientPanel extends Parent implements Observer {
                 clientSend.sendMessage(newMessage);
             }
         });
+        //Init connectionButton
+        this.connectBtn.setOnAction(event ->{
+            connectionPanel.setVisible(false);
+            chatPannel.setVisible(true);
+            this.client = new Client(address.getText(),Integer.parseInt(port.getText()));
+            this.clientSend = this.client.getClientSend();
+            this.username = usernameText.getText();
+        } );
     }
 
     /**
      * Private method used to print a new message on panel.
      */
     private void printNewMessage(String message) {
-        Label newMessage = new Label(message);
+        Calendar now = Calendar.getInstance();
+        System.out.println(now.get(Calendar.HOUR_OF_DAY) + ":" + now.get(Calendar.MINUTE));
+        Label newMessage = new Label("[" + now.get(Calendar.HOUR_OF_DAY) + ":" + now.get(Calendar.MINUTE) + "] " + message);
         newMessage.setPrefWidth(400);
         newMessage.setWrapText(true);
         newMessage.setPadding(new Insets(5, 0, 0, 0));
