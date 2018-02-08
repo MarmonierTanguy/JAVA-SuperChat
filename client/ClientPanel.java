@@ -234,6 +234,7 @@ public class ClientPanel extends Parent implements Observer {
             }
         });
         //Init connectionButton
+        //Verify what contains the field
         this.connectBtn.setOnAction(event ->{
             if ( !(usernameText.getText().isEmpty()) && (!(address.getText().isEmpty()) && !(address.getText().contains("[a-zA-Z]+"))) && (!(port.getText().isEmpty() || !(port.getText().contains("[a-zA-Z]+")))) ) {
                 connectionPanel.setVisible(false);
@@ -248,19 +249,26 @@ public class ClientPanel extends Parent implements Observer {
                 } else {
                     usernameText.setOpacity(0.5);
                 }
-                if (address.getText().isEmpty() || address.getText().contains("[a-zA-Z]+")) {
-                    address.setText("faux");
-                } else {
-                    address.setOpacity(0.5);
+
+                if (address.getText().isEmpty()) {
+                    address.setText("Vide");
                 }
-                if (port.getText().isEmpty() || port.getText().contains("[a-zA-Z]+")) {
-                    port.setText("faux");
-                } else {
-                    port.setOpacity(0.5);
+                else {
+                    if (address.getText().matches("[0-9]+")) {
+                        address.setText("Nombre uniquemenet");
+                    } else {
+                        address.setOpacity(0.5);
+                    }
                 }
 
-                //address.setOpacity(usernameText.getText().isEmpty() ? 0.0 : 1.0);
-                //port.setOpacity(usernameText.getText().isEmpty()? 0.0 : 1.0);
+                if (port.getText().isEmpty()) {
+                    port.setText("Vide");
+                }
+                else { if (port.getText().contains("[a-zA-Z]+")) {
+                    port.setText("Nombre uniquemenet");
+                }
+                else { port.setOpacity(0.5); }
+                }
             }
         } );
     }
