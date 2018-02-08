@@ -236,7 +236,7 @@ public class ClientPanel extends Parent implements Observer {
         //Init connectionButton
         //Verify what contains the field
         this.connectBtn.setOnAction(event ->{
-            if ( !(usernameText.getText().isEmpty()) && (!(address.getText().isEmpty()) && !(address.getText().contains("[a-zA-Z]+"))) && (!(port.getText().isEmpty() || !(port.getText().contains("[a-zA-Z]+")))) ) {
+            if ( !(usernameText.getText().isEmpty()) && !(address.getText().isEmpty()) && !(port.getText().isEmpty()) ) {
                 connectionPanel.setVisible(false);
                 chatPannel.setVisible(true);
                 this.client = new Client(address.getText(), Integer.parseInt(port.getText()), this.newMessageObservable);
@@ -245,7 +245,7 @@ public class ClientPanel extends Parent implements Observer {
             }
             else {
                 if (usernameText.getText().isEmpty()) {
-                    usernameText.setText("faux");
+                    usernameText.setText("Vide");
                 } else {
                     usernameText.setOpacity(0.5);
                 }
@@ -254,20 +254,14 @@ public class ClientPanel extends Parent implements Observer {
                     address.setText("Vide");
                 }
                 else {
-                    if (address.getText().matches("[0-9]+")) {
-                        address.setText("Nombre uniquemenet");
-                    } else {
-                        address.setOpacity(0.5);
-                    }
+                    address.setOpacity(0.5);
                 }
 
                 if (port.getText().isEmpty()) {
                     port.setText("Vide");
                 }
-                else { if (port.getText().contains("[a-zA-Z]+")) {
-                    port.setText("Nombre uniquemenet");
-                }
-                else { port.setOpacity(0.5); }
+                else {
+                    port.setOpacity(0.5);
                 }
             }
         } );
