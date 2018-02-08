@@ -29,7 +29,7 @@ public class Server {
     public void broadcastMessage(String message, int id) {
         for (ConnectedClient client : clients) {
             if (client.getId() != id) {
-                client.sendMessage("[" + id + "] : " + message);
+                client.sendMessage(message);
             }
         }
     }

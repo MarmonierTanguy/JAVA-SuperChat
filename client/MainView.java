@@ -13,14 +13,9 @@ public class MainView extends Application {
         // Init message observable (used to update the gui).
         NewMessageObservable newMessageObservable = new NewMessageObservable();
 
-        // Init client.
-        String address = "localhost";
-        Integer port = new Integer(8888);
-        Client client = new Client(address, port, newMessageObservable);
-
         // Init panel.
         Group root = new Group();
-        ClientPanel clientPanel = new ClientPanel(client.getClientSend(), newMessageObservable);
+        ClientPanel clientPanel = new ClientPanel(newMessageObservable);
         root.getChildren().add(clientPanel);
         primaryStage.setTitle("SuperChat");
         Scene scene = new Scene(root, 600, 500);
